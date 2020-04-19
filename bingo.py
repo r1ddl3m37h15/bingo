@@ -22,7 +22,7 @@
 # THE SOFTWARE.
 # 
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 __author__ = 'Jeff Suess'
 __license__ = 'MIT'
 
@@ -30,6 +30,8 @@ import random, sys
 from termcolor import colored
 import os
 import logging
+import time
+
 logging.basicConfig(format='%(levelname)s:%(message)s', filename='bingo.log', level=logging.DEBUG)
 
 
@@ -39,17 +41,17 @@ logging.basicConfig(format='%(levelname)s:%(message)s', filename='bingo.log', le
 
 
 # column spacer
-space = "   "
-# headings for the called balls list and the bingo card
-headings = colored("_B__" + space + "_I__" + space + "_N__" + space + "_G__" + space + "_O__","cyan")
+spacer = "   "
+# heading for the called balls list and the bingo card
+headings = colored("_B_" + spacer + "_I_" + spacer + "_N_" + spacer + "_G_" + spacer + "_O_","cyan")
 
 # ball names
-colb = ["B  1","B  2","B  3","B  4","B  5","B  6","B  7","B  8","B  9","B 10","B 11","B 12","B 13","B 14","B 15"]
-coli = ["I 16","I 17","I 18","I 19","I 20","I 21","I 22","I 23","I 24","I 25","I 26","I 27","I 28","I 29","I 30"]
-coln = ["N 31","N 32","N 33","N 34","N 35","N 36","N 37","N 38","N 39","N 40","N 41","N 42","N 43","N 44","N 45"]
-colg = ["G 46","G 47","G 48","G 49","G 50","G 51","G 52","G 53","G 54","G 55","G 56","G 57","G 58","G 59","G 60"]
-colo = ["O 61","O 62","O 63","O 64","O 65","O 66","O 67","O 68","O 69","O 70","O 71","O 72","O 73","O 74","O 75"]
-freespace = ["Free"]
+colb = ["B-1","B-2","B-3","B-4","B-5","B-6","B-7","B-8","B-9","B10","B11","B12","B13","B14","B15"]
+coli = ["I16","I17","I18","I19","I20","I21","I22","I23","I24","I25","I26","I27","I28","I29","I30"]
+coln = ["N31","N32","N33","N34","N35","N36","N37","N38","N39","N40","N41","N42","N43","N44","N45"]
+colg = ["G46","G47","G48","G49","G50","G51","G52","G53","G54","G55","G56","G57","G58","G59","G60"]
+colo = ["O61","O62","O63","O64","O65","O66","O67","O68","O69","O70","O71","O72","O73","O74","O75"]
+freespace = ["F-S"]
 allballs=colb + coli + coln + colg + colo + freespace
 
 rawinput=str()
@@ -62,6 +64,7 @@ cardcoln=list()
 cardcolg=list()
 cardcolo=list()
 winners=list()
+pullOrder=list()
 
 
 
@@ -72,10 +75,27 @@ winners=list()
 def flowerBox(message):
     """ print a message in a flower box """
     mlen=len(message)
+    print("")
     print("-" * ( 6 + mlen + 6))
     print("-" * 5 + " " + message + " " + "-" * 5)
     print("-" * ( 6 + mlen + 6))
     logging.info('event %s',message)
+
+
+
+def mixTheBalls():
+    """ shuffle a list of numbers """
+    global idxToBall
+    global pullOrder
+
+    # create a fresh list of balls, pulled balls will be change to green
+    # index the new balls 
+    idxToBall = { i : allballs[i] for i in range(0, len(allballs) ) }
+    # print(idxToBall)
+
+    pullOrder=list(range(75))
+    random.shuffle(pullOrder)
+    logging.debug('new pull order for balls %s ',pullOrder)
 
 
 
@@ -89,18 +109,21 @@ def newcard():
     global cardcolg
     global cardcolo
     global winners
+
     # load a list of numbers matching index into the columns
     cardcolb = list(range(15))
     cardcoli = list(range(15,30))
     cardcoln = list(range(31,45))
     cardcolg = list(range(46,60))
     cardcolo = list(range(61,75))
+
     # shuffle the columns
     random.shuffle(cardcolb)
     random.shuffle(cardcoli)
     random.shuffle(cardcoln)
     random.shuffle(cardcolg)
     random.shuffle(cardcolo)
+
     # add a free space to the card
     cardcoln[2]=75
     # keep first 5
@@ -109,13 +132,15 @@ def newcard():
     cardcoln[5:]=[]
     cardcolg[5:]=[]
     cardcolo[5:]=[]
+
     # log it
     logging.debug('new card col b %s ',cardcolb)
     logging.debug('new card col i %s ',cardcoli)
     logging.debug('new card col n %s ',cardcoln)
     logging.debug('new card col g %s ',cardcolg)
     logging.debug('new card col o %s ',cardcolo)
-    # win combos
+
+    # win combos that are on the card
     winners=[cardcolb,cardcoli,[cardcoln[0],cardcoln[1],cardcoln[3],cardcoln[4]],cardcolg,cardcolo, \
              [cardcolb[0],cardcoli[0],cardcoln[0],cardcolg[0],cardcolo[0]], \
              [cardcolb[1],cardcoli[1],cardcoln[1],cardcolg[1],cardcolo[1]], \
@@ -125,7 +150,7 @@ def newcard():
              [cardcolb[0],cardcoli[1],cardcolg[3],cardcolo[4]], \
              [cardcolb[4],cardcoli[3],cardcolg[1],cardcolo[0]], \
              [cardcolb[0],cardcolb[4],cardcolo[0],cardcolo[4]]]
-    print(winners)
+    # print(winners)
 
 
 
@@ -135,35 +160,35 @@ def playgame():
     global winners
     global idxToBall
     global rawinput
+    global pullOrder
 
-    # os.system('clear||cls')
-    print("")
-    print("")
-    print("")
-    print("")
+    os.system('clear||cls')
     flowerBox("New Game")
-    print("")
 
-    # create a fresh list of balls, pulled balls will be change to green
-    # index the new balls 
-    idxToBall = { i : allballs[i] for i in range(0, len(allballs) ) }
-    # print(idxToBall)
-    # pull free space
+    mixTheBalls()
+
+    # pull free space and the first 3 balls
     pullball(75)
-
-    # shuffle a list of numbers
-    pullOrder=list(range(75))
-    random.shuffle(pullOrder)
-    logging.debug('new pull order for balls %s ',pullOrder)
+    for x in range(3):
+        pullball(pullOrder[x])
 
     # loop through the list of pulled balls
-    for x in range(75):
+    for x in range(3,75):
         # print(pullOrder[x])
         pullball(pullOrder[x])
         printcalled()
-        printcard()
+
         print("")
         print(str(x+1) + " balls called")
+
+        print("")
+        for n in range(x+1):
+            print(idxToBall[pullOrder[n]], end='  ')
+            if (n % 10)==9:
+                print("")
+        print("")
+            
+        printcard()
 
         # check for a bingo
         # print(pullOrder[:x+1])
@@ -175,48 +200,41 @@ def playgame():
                 for k in j:
                     # print(k)
                     print(idxToBall[k], end='  ')
+                # new line for loop above
                 print("")
+                # we have a winner. game over.
+                return
 
-        print("Press <Enter> to draw again, enter \"b\" for a Bingo or enter \"q\" to quit.")
-        rawinput=input()
-        if str(rawinput) == "":
-            os.system('clear||cls')
-            continue
-        if str(rawinput) == "b":
-            flowerBox("BINGO!")
-            break
-        if str(rawinput) == "q":
-            flowerBox("Game Over")
-            exit()
-        if str(rawinput) == "x":
-            flowerBox("You Died")
-            exit()
+        time.sleep(1)
+        os.system('clear||cls')
 
-    # play again with or without a new card
-    print("Press <Enter> to play again, enter \"n\" for a new Bingo card or enter \"q\" to quit.")
-    rawinput=input()
-    if str(rawinput) == "q":
-        flowerBox("Game Over")
-        exit()
-    if str(rawinput) == "x":
-        flowerBox("You Died")
-        exit()
-    if str(rawinput) == "n":
-        newcard()
+        # print("")
+        # print("Press <Enter> to draw again, or enter \"q\" to quit.")
+        # rawinput=input()
+        # if str(rawinput) == "":
+            # os.system('clear||cls')
+            # continue
+        # if str(rawinput) == "q":
+            # flowerBox("Game Over")
+            # exit()
+        # if str(rawinput) == "x":
+            # flowerBox("You Died")
+            # exit()
 
 
 
 def printcalled():
     """ print the called ball list. called ball will be green """
     global headings
-    global space
+    global spacer
+
     print("")
     print(headings)
     for x in range(15):
-        print(idxToBall[x] + space + \
-              idxToBall[x+15] + space + \
-              idxToBall[x+30] + space + \
-              idxToBall[x+45] + space + \
+        print(idxToBall[x] + spacer + \
+              idxToBall[x+15] + spacer + \
+              idxToBall[x+30] + spacer + \
+              idxToBall[x+45] + spacer + \
               idxToBall[x+60])
 
 
@@ -224,24 +242,25 @@ def printcalled():
 def printcard():
     """ print the bingo card. called balls will be green """
     global headings
-    global space
+    global spacer
+
     print("")
     print(headings)
     for x in range(5):
-        print( idxToBall[cardcolb[x]] + space + \
-               idxToBall[cardcoli[x]] + space + \
-               idxToBall[cardcoln[x]] + space + \
-               idxToBall[cardcolg[x]] + space + \
+        print( idxToBall[cardcolb[x]] + spacer + \
+               idxToBall[cardcoli[x]] + spacer + \
+               idxToBall[cardcoln[x]] + spacer + \
+               idxToBall[cardcolg[x]] + spacer + \
                idxToBall[cardcolo[x]])
 
 
 
 def pullball(ball):
     """ mark a ball as pulled and print its name. make the ball's name green."""
-    # print(ball)
     global idxToBall
+
     idxToBall[ball] = colored( idxToBall[ball], "green" )
-    print("")
+
     print("")
     print(idxToBall[ball])
 
@@ -254,4 +273,18 @@ def pullball(ball):
 newcard()
 while True:
     playgame()
+
+    # play again with or without a new card
+    print("")
+    print("Press <Enter> to play again, enter \"n\" for a new Bingo card or enter \"q\" to quit.")
+    rawinput=input()
+    if str(rawinput) == "q":
+        flowerBox("Game Over")
+        exit()
+    if str(rawinput) == "x":
+        flowerBox("You Died")
+        exit()
+    if str(rawinput) == "n":
+        newcard()
+
 
