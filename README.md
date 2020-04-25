@@ -2,7 +2,7 @@
 
 A simple bingo game that I wrote to learn python3.
 
-![BINGO](./ex1.svg)
+![BINGO](./image/ex1.svg)
 
 ## The Animation
 
@@ -49,7 +49,7 @@ pip install termplotlib
 
 ### All Games
 
-![Histogram All Games](./histo4.png)
+![Histogram All Games](./image/histo4.png)
 
 ### Bingos Using 4 Spaces
 
@@ -58,11 +58,11 @@ pip install termplotlib
 - row 3
 - column N
 
-![Histogram for 4 spaces](./histo4.png)
+![Histogram for 4 spaces](./image/histo4.png)
 
 ### Bingos Using 5 Spaces
 
 - rows 1, 2, 4 and 5
 - columns B, I, G and O
 
-![Histogram for 5 spaces](./histo5.png)
+![Histogram for 5 spaces](./image/histo5.png)
