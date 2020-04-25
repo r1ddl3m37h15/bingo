@@ -31,9 +31,7 @@ from termcolor import colored
 import os
 import logging
 import time
-
-logging.basicConfig(format='%(levelname)s:%(message)s', filename='bingo.log', level=logging.DEBUG)
-
+import argparse
 
 
 ########## global vars ##########
@@ -99,8 +97,9 @@ def mixTheBalls():
 
 
 
-def newcard():
+def newcard(cardNumber=1):
     """ create a new bingo card """
+    cardNumber += 1
     # TODO list of card objects
     # shuffle each column to create a new card
     global cardcolb
@@ -151,10 +150,63 @@ def newcard():
              [cardcolb[4],cardcoli[3],cardcolg[1],cardcolo[0]], \
              [cardcolb[0],cardcolb[4],cardcolo[0],cardcolo[4]]]
     # print(winners)
+    return {'B':cardcolb, 'I':cardcoli, 'N':cardcoln, 'G':cardcolg, 'O':cardcolo, 'card': cardNumber}
 
 
 
-def playgame():
+def checkCard(x):
+    """ play fast a game """
+    global allballs
+    global winners
+    global idxToBall
+    global rawinput
+    global pullOrder
+    # check for a bingo
+    # print(pullOrder[:x+1])
+    for j in winners:
+        # print("   " + str(len(j)) + "   " + str(j))
+        # print("    " + str(len(set(j).intersection(pullOrder[:x+1]))) + "   " + str(set(j).intersection(pullOrder[:x+1])))
+        if len(j) == len(set(j).intersection(pullOrder[:x+1])):
+            # we have a winner. game over.
+            if args.games == None:
+                flowerBox("BINGO!")
+                print("\a")
+            lBingo = []
+            for k in j:
+                # green
+                print(idxToBall[k],end=' ')
+                # for log without esc codes 
+                lBingo.append(allballs[k])
+            # new line for loop above
+            print("")
+            logging.info('winnerAtBall %s with %s balls',x+1,str(len(lBingo)))
+            logging.info('lastBall %s',str(allballs[pullOrder[x]]))
+            logging.info('checkCard %s balls: %s',str(len(lBingo)),str(lBingo))
+            return 1
+    return 0
+
+
+
+def playGameA():
+    """ play fast a game """
+    global allballs
+    global winners
+    global idxToBall
+    global rawinput
+    global pullOrder
+
+    mixTheBalls()
+    pullball(75)
+    for x in range(3):
+        pullball(pullOrder[x])
+    for x in range(3,75):
+        pullball(pullOrder[x])
+        if checkCard(x):
+            return
+
+
+
+def playGameUI():
     """ would you like to play a game """
     global allballs
     global winners
@@ -174,8 +226,8 @@ def playgame():
 
     # loop through the list of pulled balls
     for x in range(3,75):
-        # print(pullOrder[x])
         pullball(pullOrder[x])
+
         printcalled()
 
         print("")
@@ -190,36 +242,22 @@ def playgame():
             
         printcard()
 
-        # check for a bingo
-        # print(pullOrder[:x+1])
-        for j in winners:
-            # print("   " + str(len(j)) + "   " + str(j))
-            # print("    " + str(len(set(j).intersection(pullOrder[:x+1]))) + "   " + str(set(j).intersection(pullOrder[:x+1])))
-            if len(j) == len(set(j).intersection(pullOrder[:x+1])):
-                flowerBox("BINGO!")
-                for k in j:
-                    # print(k)
-                    print(idxToBall[k], end='  ')
-                # new line for loop above
-                print("")
-                # we have a winner. game over.
-                return
+        if checkCard(x):
+            time.sleep(2)
+            return
 
-        time.sleep(1)
-        os.system('clear||cls')
-
-        # print("")
-        # print("Press <Enter> to draw again, or enter \"q\" to quit.")
-        # rawinput=input()
-        # if str(rawinput) == "":
-            # os.system('clear||cls')
-            # continue
-        # if str(rawinput) == "q":
-            # flowerBox("Game Over")
-            # exit()
+        print("")
+        print("Press <Enter> to draw again, or enter \"q\" to quit.")
+        rawinput=input()
+        if str(rawinput) == "":
+            os.system('clear||cls')
+            continue
+        if str(rawinput) == "q":
+            flowerBox("Game Over")
+            exit()
         # if str(rawinput) == "x":
-            # flowerBox("You Died")
-            # exit()
+            flowerBox("You Died")
+            exit()
 
 
 
@@ -269,22 +307,31 @@ def pullball(ball):
 ########## main ##########
 
 
+logging.basicConfig(format='%(levelname)s:%(message)s', filename='bingo.log', level=logging.DEBUG)
 
-newcard()
-while True:
-    playgame()
+parser = argparse.ArgumentParser(description='Bingo Game')
+parser.add_argument('-g', '--games', type=int, 
+                    help='AutoPlay i Games')
+args = parser.parse_args()
 
-    # play again with or without a new card
-    print("")
-    print("Press <Enter> to play again, enter \"n\" for a new Bingo card or enter \"q\" to quit.")
-    rawinput=input()
-    if str(rawinput) == "q":
-        flowerBox("Game Over")
-        exit()
-    if str(rawinput) == "x":
-        flowerBox("You Died")
-        exit()
-    if str(rawinput) == "n":
-        newcard()
-
+if args.games == None:
+    newcard()
+    while True:
+        playGameUI()
+        # play again with or without a new card
+        print("")
+        print("Press <Enter> to play again, enter \"n\" for a new Bingo card or enter \"q\" to quit.")
+        rawinput=input()
+        if str(rawinput) == "q":
+            flowerBox("Game Over")
+            exit()
+        if str(rawinput) == "x":
+            flowerBox("You Died")
+            exit()
+        if str(rawinput) == "n":
+            newcard()
+else:
+    for a in range(args.games):
+       newcard()
+       playGameA()
 
