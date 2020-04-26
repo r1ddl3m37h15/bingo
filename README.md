@@ -66,3 +66,10 @@ pip install termplotlib
 - columns B, I, G and O
 
 ![Histogram for 5 spaces](./image/histo5.png)
+
+### First Ball
+
+Should be flat
+
+![Histogram First Ball called](./image/histoF.png)
+

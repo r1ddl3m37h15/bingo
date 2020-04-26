@@ -34,6 +34,7 @@ import time
 import argparse
 
 
+
 ########## global vars ##########
 
 
@@ -113,11 +114,17 @@ def newCard(cardNumber=1):
     global winners
 
     # load a list of numbers matching index into the columns
-    cardcolb = list(range(15))
-    cardcoli = list(range(15,30))
-    cardcoln = list(range(31,45))
-    cardcolg = list(range(46,60))
-    cardcolo = list(range(61,75))
+    cardcolb = list(range(1,16))
+    cardcoli = list(range(16,31))
+    cardcoln = list(range(31,46))
+    cardcolg = list(range(46,61))
+    cardcolo = list(range(61,76))
+
+    print(cardcolb)
+    print(cardcoli)
+    print(cardcoln)
+    print(cardcolg)
+    print(cardcolo)
 
     # shuffle the columns
     random.shuffle(cardcolb)
@@ -176,6 +183,7 @@ def checkCard(x):
                 print("\a")
             lBingo = []
             for k in j:
+                idxToBall[k] = colored( allballs[k], "red" )
                 # green
                 print(idxToBall[k],end=' ')
                 # for log without esc codes 
@@ -217,7 +225,7 @@ def playGameUI():
     global rawinput
     global pullOrder
 
-    os.system('clear||cls')
+    #os.system('clear||cls')
     flowerBox("New Game")
 
     mixTheBalls()
@@ -246,6 +254,9 @@ def playGameUI():
         printCard()
 
         if checkCard(x):
+            time.sleep(1)
+            printCalled()
+            printCard()
             time.sleep(2)
             return
 
@@ -253,7 +264,7 @@ def playGameUI():
         print("Press <Enter> to draw again, or enter \"q\" to quit.")
         rawinput=input()
         if str(rawinput) == "":
-            os.system('clear||cls')
+            #os.system('clear||cls')
             continue
         if str(rawinput) == "q":
             flowerBox("Game Over")
@@ -300,7 +311,7 @@ def pullBall(ball):
     """ mark a ball as pulled and print its name. make the ball's name green."""
     global idxToBall
 
-    idxToBall[ball] = colored( idxToBall[ball], "green" )
+    idxToBall[ball] = colored( allballs[ball], "green" )
 
     print("")
     print(idxToBall[ball])
