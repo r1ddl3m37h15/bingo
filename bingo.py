@@ -120,11 +120,11 @@ def newCard(cardNumber=1):
     cardcolg = list(range(46,61))
     cardcolo = list(range(61,76))
 
-    print(cardcolb)
-    print(cardcoli)
-    print(cardcoln)
-    print(cardcolg)
-    print(cardcolo)
+    #print(cardcolb)
+    #print(cardcoli)
+    #print(cardcoln)
+    #print(cardcolg)
+    #print(cardcolo)
 
     # shuffle the columns
     random.shuffle(cardcolb)
