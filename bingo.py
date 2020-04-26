@@ -50,7 +50,8 @@ coln = ["N31","N32","N33","N34","N35","N36","N37","N38","N39","N40","N41","N42",
 colg = ["G46","G47","G48","G49","G50","G51","G52","G53","G54","G55","G56","G57","G58","G59","G60"]
 colo = ["O61","O62","O63","O64","O65","O66","O67","O68","O69","O70","O71","O72","O73","O74","O75"]
 freespace = ["F-S"]
-allballs=colb + coli + coln + colg + colo + freespace
+# make FreeSpace 0 so b1 is 1 etc...
+allballs=freespace + colb + coli + coln + colg + colo
 
 rawinput=str()
 # index of all names. balls (0-74) and freespace (75). called are set to green.
@@ -91,13 +92,15 @@ def mixTheBalls():
     idxToBall = { i : allballs[i] for i in range(0, len(allballs) ) }
     # print(idxToBall)
 
-    pullOrder=list(range(75))
+    pullOrder=list(range(1,76))
     random.shuffle(pullOrder)
     logging.debug('new pull order for balls %s ',pullOrder)
+    # add free space to begining
+    pullOrder.insert(0,0)
 
 
 
-def newcard(cardNumber=1):
+def newCard(cardNumber=1):
     """ create a new bingo card """
     cardNumber += 1
     # TODO list of card objects
@@ -124,7 +127,7 @@ def newcard(cardNumber=1):
     random.shuffle(cardcolo)
 
     # add a free space to the card
-    cardcoln[2]=75
+    cardcoln[2]=0
     # keep first 5
     cardcolb[5:]=[]
     cardcoli[5:]=[]
@@ -196,11 +199,11 @@ def playGameA():
     global pullOrder
 
     mixTheBalls()
-    pullball(75)
-    for x in range(3):
-        pullball(pullOrder[x])
-    for x in range(3,75):
-        pullball(pullOrder[x])
+
+    for x in range(4):
+        pullBall(pullOrder[x])
+    for x in range(4,76):
+        pullBall(pullOrder[x])
         if checkCard(x):
             return
 
@@ -219,28 +222,28 @@ def playGameUI():
 
     mixTheBalls()
 
-    # pull free space and the first 3 balls
-    pullball(75)
-    for x in range(3):
-        pullball(pullOrder[x])
+    # pull free space and the first 4 balls
+
+    for x in range(4):
+        pullBall(pullOrder[x])
 
     # loop through the list of pulled balls
-    for x in range(3,75):
-        pullball(pullOrder[x])
+    for x in range(4,76):
+        pullBall(pullOrder[x])
 
-        printcalled()
-
-        print("")
-        print(str(x+1) + " balls called")
+        printCalled()
 
         print("")
-        for n in range(x+1):
+        print(str(x) + " balls called")
+
+        print("")
+        for n in range(1,x+1):
             print(idxToBall[pullOrder[n]], end='  ')
-            if (n % 10)==9:
+            if (n % 10)==0:
                 print("")
         print("")
             
-        printcard()
+        printCard()
 
         if checkCard(x):
             time.sleep(2)
@@ -261,14 +264,14 @@ def playGameUI():
 
 
 
-def printcalled():
+def printCalled():
     """ print the called ball list. called ball will be green """
     global headings
     global spacer
 
     print("")
     print(headings)
-    for x in range(15):
+    for x in range(1,16):
         print(idxToBall[x] + spacer + \
               idxToBall[x+15] + spacer + \
               idxToBall[x+30] + spacer + \
@@ -277,7 +280,7 @@ def printcalled():
 
 
 
-def printcard():
+def printCard():
     """ print the bingo card. called balls will be green """
     global headings
     global spacer
@@ -293,7 +296,7 @@ def printcard():
 
 
 
-def pullball(ball):
+def pullBall(ball):
     """ mark a ball as pulled and print its name. make the ball's name green."""
     global idxToBall
 
@@ -315,7 +318,7 @@ parser.add_argument('-g', '--games', type=int,
 args = parser.parse_args()
 
 if args.games == None:
-    newcard()
+    newCard()
     while True:
         playGameUI()
         # play again with or without a new card
@@ -329,9 +332,9 @@ if args.games == None:
             flowerBox("You Died")
             exit()
         if str(rawinput) == "n":
-            newcard()
+            newCard()
 else:
     for a in range(args.games):
-       newcard()
+       newCard()
        playGameA()
 
