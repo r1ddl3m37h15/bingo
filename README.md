@@ -2,7 +2,7 @@
 
 A simple bingo game that I wrote to learn python3.
 
-![BINGO](./ex1.svg)
+![BINGO](./image/ex1.svg)
 
 ## The Animation
 
