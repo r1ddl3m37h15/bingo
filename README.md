@@ -4,16 +4,37 @@ A simple bingo game that I wrote to learn python3.
 
 <img src="./image/ex1.svg" width="600" />
 
-## The Animation
 
-### The Install
+## Run local with python3
+
 ```bash
 # Create virtualenv named '.venv'
 python3 -m venv .venv
 # Activate virtualenv
 source .venv/bin/activate
-pip3 install termtosvg
+pip3 install -r requirements.txt
 ```
+
+## run in docker
+
+```bash
+./docker-build.bash
+./docker-new-game.bash
+```
+
+## Develop in docker
+
+```bash
+./docker-develop.bash
+```
+
+## Set Dependencies
+
+```bash
+pip3 freeze > requirements.txt
+```
+
+## The Animation
 
 ### Create
 ```bash

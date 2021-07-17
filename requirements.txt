@@ -1,0 +1,5 @@
+lxml==4.6.3
+pyte==0.8.0
+termcolor==1.1.0
+termtosvg==1.1.0
+wcwidth==0.2.5
